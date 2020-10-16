@@ -4,16 +4,11 @@ This file includes:
 
 
 Users should cite the *original code* using the following references:
-
-- J.J. Downs and E.F. Vogel, *A plant-wide industrial process control problem*. Presented at the AIChE 1990 Annual Meeting, Session on Industrial Challenge Problems in Process Control, Paper #24a Chicago, Illinois, November 14, 1990.
 - [J.J. Downs and E.F. Vogel, *A plant-wide industrial process control problem*, Computers and Chemical Engineering, 17:245-255 (1993)](https://doi.org/10.1016/0098-1354(93)80018-I).
 
-Users should cite the *modified code* using the following references:
+Users should cite the latest version using the following references:
+- [Bathelt, Andreas, N. Lawrence Ricker, and Mohieddine Jelali. "Revision of the tennessee eastman process model." IFAC-PapersOnLine 48.8 (2015): 309-314.]
 
-- [E.L. Russell, L.H. Chiang, and R.D. Braatz. Data-driven Techniques for Fault Detection and Diagnosis in Chemical Processes, Springer-Verlag, London, 2000](https://doi.org/10.1007/978-1-4471-0409-4).
-- [L.H. Chiang, E.L. Russell, and R.D. Braatz. Fault Detection and Diagnosis in Industrial Systems, Springer-Verlag, London, 2001](https://doi.org/10.1007/978-1-4471-0347-9).
-- [L.H. Chiang, E.L. Russell, and R.D. Braatz. *Fault diagnosis in chemical processes using Fisher discriminant analysis, discriminant partial least squares, and principal component analysis*, Chemometrics and Intelligent Laboratory Systems, 50:243-252, 2000](https://doi.org/10.1016/S0169-7439(99)00061-1).
-- [E.L. Russell, L.H. Chiang, and R.D. Braatz. *Fault detection in industrial processes using canonical variate analysis and dynamic principal component analysis*, Chemometrics and Intelligent Laboratory Systems, 51:81-93, 2000](https://doi.org/10.1016/S0169-7439(00)00058-7).
 
 ### Instructions for running the program
 
@@ -72,73 +67,6 @@ Revised 4-4-91 to correct error in documentation of manipulated variables
 > 
 > Kingsport, TN  37662
 
-**Reference**
-
-- A Plant-Wide Industrial Process Control Problem". Presented at the AIChE 1990 Annual Meeting Industrial Challenge Problems in Process Control, Paper #24a Chicago, Illinois, November 14, 1990.
-
-### Subroutines
-
-- `TEFUNC` - Function evaluator to be called by integrator
-- `TEINIT` - Initialization
-- `TESUBi` - Utility subroutines ($i = 1, 2, ..., 8$)
-
-The process simulation has 50 states (`NN=50`).
-
-If the user wishes to integrate additional states, `NN` must be increased accordingly in the calling program.
-
-The additional states should be appended to the end of the `YY` vector, e.g. `YY(51), ...`. The additional derivatives should be appended to the end of the `YP` vector, e.g. `YP(51),...`.
-
-To initialize the new states and to calculate derivatives for them, we suggest creating new function evaluator and initialization routines as follows.
-
-```fortran
-C-----------------------------------------------
-C
-      SUBROUTINE FUNC(NN,TIME,YY,YP)
-C
-      INTEGER NN
-      DOUBLE PRECISION TIME, YY(NN), YP(NN)
-C
-C  Call the function evaluator for the process
-C
-      CALL TEFUNC(NN,TIME,YY,YP)
-C
-C  Calculate derivatives for additional states
-C
-      YP(51) = ....
-      YP(52) = ....
-         .
-         .
-         .
-      YP(NN) = ....
-C
-      RETURN
-      END
-C
-C-----------------------------------------------
-C
-      SUBROUTINE INIT(NN,TIME,YY,YP)
-C
-      INTEGER NN
-      DOUBLE PRECISION TIME, YY(NN), YP(NN)
-C
-C  Call the initialization for the process
-C
-      CALL TEINIT(NN,TIME,YY,YP)
-C
-C  Initialize additional states
-C
-      YY(51) = ....
-      YY(52) = ....
-         .
-         .
-         .
-      YY(NN) = ....
-C
-      RETURN
-      END
-C
-C-----------------------------------------------
-```
 
 *Differences between the code and its description in the paper:*
 
@@ -236,27 +164,37 @@ Variable | Description | unit
 	`XMEAS(40)` | Component G
 	`XMEAS(41)` | Component H
 
-### Process Disturbances
+### Process Disturbances (Fault)
 
-Variable | Description
--------- | -----------
-`IDV(1)`  | A/C Feed Ratio, B Composition Constant (Stream 4)          Step
-`IDV(2)`  | B Composition, A/C Ratio Constant (Stream 4)               Step
-`IDV(3)`  | D Feed Temperature (Stream 2)                              Step
-`IDV(4)`  | Reactor Cooling Water Inlet Temperature                    Step
-`IDV(5)`  | Condenser Cooling Water Inlet Temperature                  Step
-`IDV(6)`  | A Feed Loss (Stream 1)                                     Step
-`IDV(7)`  | C Header Pressure Loss - Reduced Availability (Stream 4)   Step
-`IDV(8)`  | A, B, C Feed Composition (Stream 4)            Random Variation
-`IDV(9)`  | D Feed Temperature (Stream 2)                  Random Variation
-`IDV(10)` | C Feed Temperature (Stream 4)                  Random Variation
-`IDV(11)` | Reactor Cooling Water Inlet Temperature        Random Variation
-`IDV(12)` | Condenser Cooling Water Inlet Temperature      Random Variation
-`IDV(13)` | Reaction Kinetics                                    Slow Drift
-`IDV(14)` | Reactor Cooling Water Valve                            Sticking
-`IDV(15)` | Condenser Cooling Water Valve                          Sticking
-`IDV(16)` | Unknown
-`IDV(17)` | Unknown
-`IDV(18)` | Unknown
-`IDV(19)` | Unknown
-`IDV(20)` | Unknown
+Fault ID | Descriptions                                                                   | Type
+-------- | -------------------------------------------------------------------------------|-----------------
+`IDV(1)`  | A/C Feed Ratio, B Composition Constant (Stream 4)        				      | Step
+`IDV(2)`  | B Composition, A/C Ratio Constant (Stream 4)             				      | Step
+`IDV(3)`  | D Feed Temperature (Stream 2)                            				      | Step
+`IDV(4)`  | Reactor Cooling Water Inlet Temperature                  				      | Step
+`IDV(5)`  | Condenser Cooling Water Inlet Temperature                				      | Step
+`IDV(6)`  | A Feed Loss (Stream 1)                                   				      | Step
+`IDV(7)`  | C Header Pressure Loss - Reduced Availability (Stream 4) 				      | Step
+`IDV(8)`  | A, B, C Feed Composition (Stream 4)          				  | Random Variation
+`IDV(9)`  | D Feed Temperature (Stream 2)                				  | Random Variation
+`IDV(10)` | C Feed Temperature (Stream 4)                				  | Random Variation
+`IDV(11)` | Reactor Cooling Water Inlet Temperature     		        	  | Random Variation
+`IDV(12)` | Condenser Cooling Water Inlet Temperature    				  | Random Variation
+`IDV(13)` | Reaction Kinetics                                  			      		   | Slow Drift
+`IDV(14)` | Reactor Cooling Water Valve                          		       	 	   | Sticking
+`IDV(15)` | Condenser Cooling Water Valve                        		        	   | Sticking
+`IDV(16)` | Unknown                                               				   | Unknown
+`IDV(17)` | Unknown                                               			           | Unknown
+`IDV(18)` | Unknown                                               			  	   | Unknown
+`IDV(19)` | Unknown                                              				   | Unknown
+`IDV(20)` | Unknown                                              				   | Unknown
+`IDV(21)` | A feed temperature (stream 1)                          			  | Random Variation
+`IDV(22)` | E feed temperature (stream 3)                          			  | Random Variation 
+`IDV(23)` | A feed pressure (stream 1)                             			  | Random Variation
+`IDV(24)` | D feed pressure (stream 2)                             			  | Random Variation
+`IDV(25)` | E feed pressure (stream 3)                                                    | Random Variation
+`IDV(26)` | A and C feed pressure (stream 4)                                              | Random Variation
+`IDV(27)` | pressure ﬂuctuation in the cooling water re-circulating unit of the reactor   | Random Variation
+`IDV(28)` | pressure ﬂuctuation in the cooling water re-circulating unit of the condenser | Random Variation
+
+			
